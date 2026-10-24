@@ -63,6 +63,17 @@ Relation text (`app/services/report_models.py`): `required_by` → "Required by"
 | Sprinklers | none (don't claim a requirement) | `umass_off_campus` |
 | Construction next door | none | `nfpa_construction` |
 
+## Nearest-college guidance
+
+TwoWaysOut isn't only for UMass students. College guidance comes from `app/content/colleges.py`:
+UMass Amherst (`umass_off_campus`), Boston University (`bu_off_campus`), Tufts
+(`tufts_off_campus`), and MIT (`mit_off_campus`), each from its official off-campus fire safety
+page. `app/services/colleges.py` picks the college nearest the rental (or the one the student
+chose) and re-points college citations to it, only for topics that college's `topics` covers.
+Otherwise it uses `nfpa_campus` (NFPA college campus tips) or the State Sanitary Code. Amherst
+Fire Department citations stay only for Amherst rentals. To add a college, fetch and read its
+official off-campus fire safety page first, then add a `Source` and a `College` entry.
+
 ## Rules
 
 1. Cite only these seven, by name. Never cite section numbers (no "105 CMR 410.xxx", "527 CMR 31",

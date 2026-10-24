@@ -1,0 +1,18 @@
+{# Off-campus fire safety guidance from the nearest (or chosen) college. college is a College. #}
+{% set src = sources[college.source_id] %}
+<section aria-labelledby="college-heading" class="panel p-5">
+  <h3 id="college-heading" class="text-xl font-semibold">Off-campus fire safety from {{ college.short_name }}</h3>
+  <p class="mt-1 text-sm muted">
+    {% if college_chosen %}You chose {{ college.name }}.{% else %}{{ college.name }} is the nearest college with off-campus fire safety guidance we've checked.{% endif %}
+  </p>
+  <ul class="mt-3 list-disc space-y-1 pl-6">
+    {% for text in college.topics.values() %}
+      <li>{{ text }}</li>
+    {% endfor %}
+  </ul>
+  <p class="mt-3 text-sm">
+    Based on guidance from
+    <a href="{{ src.url }}" class="link" target="_blank" rel="noopener noreferrer">{{ src.name }}<span class="sr-only"> (opens in a new tab)</span></a>.
+    Your college's off-campus housing office can also help you review a lease.
+  </p>
+</section>

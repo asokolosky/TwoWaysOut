@@ -11,9 +11,10 @@ from app.services.report_models import TOPIC_ORDER, LandlordQuestion
 SECTION_NUMBER = re.compile(r"\d+\s*CMR|§|\bsection\s+\d", re.IGNORECASE)
 
 
-def test_exactly_the_seven_allowed_sources():
+def test_exactly_the_allowed_sources():
     assert set(SOURCES) == set(SOURCE_IDS)
-    assert len(SOURCES) == 7
+    # Seven report sources plus three college pages (BU, Tufts, MIT) and the NFPA campus tips.
+    assert len(SOURCES) == 11
     assert LEGAL_SOURCE_IDS == {"sanitary_code", "co_alarm_rules", "smoke_alarm_rules"}
 
 

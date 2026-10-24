@@ -23,8 +23,10 @@ from app.services.boston import (
     snapshot_date,
 )
 from app.services.building_questions import construction_questions, questions_for_context
+from app.content.colleges import COLLEGES_BY_ID, College
 from app.services.census import CensusContext, census_context
-from app.services.construction import ConstructionContext, construction_context
+from app.services.colleges import localize_report, localized_topics, nearest_college
+from app.services.construction import ConstructionContext, construction_context, is_amherst
 from app.services.fire_categories import CATEGORIES
 from app.services.pdf_text import MAX_PDF_BYTES, PdfError, extract_text
 from app.services.rate_limit import RateLimiter
@@ -66,14 +68,22 @@ def _report_context(
     boston: BuildingContext | None,
     construction: ConstructionContext | None = None,
     census: CensusContext | None = None,
+    college: College | None = None,
+    college_chosen: bool = False,
+    in_amherst: bool = False,
 ) -> dict:
+    report = localize_report(report, college, in_amherst)
     building_qs = questions_for_context(boston, report.questions)
     construction_qs = construction_questions(construction)
     cited = report.cited_source_ids()
     for q in building_qs + construction_qs:
         if q.source_id not in cited:
             cited.append(q.source_id)
+    if college is not None and college.source_id not in cited:
+        cited.append(college.source_id)
     return {
+        "college": college,
+        "college_chosen": college_chosen,
         "construction": construction,
         "construction_questions": construction_qs,
         "census": census,
@@ -81,7 +91,7 @@ def _report_context(
         "address": address,
         "address_from_listing": address_from_listing,
         "notes": notes,
-        "topics": TOPICS,
+        "topics": localized_topics(college, in_amherst),
         "sources": SOURCES,
         "cited_sources": [SOURCES[s] for s in cited],
         "ctx": boston,
@@ -129,6 +139,7 @@ async def check_submit(
     # validation error. Still far below the request-size guard in app/main.py.
     listing: Annotated[str, Form(max_length=MAX_LISTING_FORM_CHARS)] = "",
     address: Annotated[str, Form(max_length=MAX_ADDRESS_CHARS)] = "",
+    college: Annotated[str, Form(max_length=40)] = "",
     lease_pdf: Annotated[UploadFile | None, File()] = None,
     settings: Settings = Depends(get_settings),
     ai_client=Depends(get_ai_client),
@@ -204,6 +215,14 @@ async def check_submit(
     lookup_address = address or report.extracted_address or find_address_in_text(listing) or ""
     boston = await run_in_threadpool(context_for_address, lookup_address, boston_db)
     construction, census = await run_in_threadpool(_area_context, lookup_address, boston, boston_db)
+    match = boston.match if boston is not None else None
+    chosen = college if college in COLLEGES_BY_ID else None
+    nearest = nearest_college(
+        lookup_address,
+        lat=match.lat if match is not None and match.matched else None,
+        lon=match.lon if match is not None and match.matched else None,
+        chosen=chosen,
+    )
     ctx = _report_context(
         report,
         address=lookup_address,
@@ -212,6 +231,9 @@ async def check_submit(
         boston=boston,
         construction=construction,
         census=census,
+        college=nearest,
+        college_chosen=chosen is not None,
+        in_amherst=is_amherst(lookup_address),
     )
 
     # HTMX swaps just the report into the page; without JS, render the full page.

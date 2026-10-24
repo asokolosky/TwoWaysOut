@@ -32,6 +32,20 @@
   </div>
 
   <div>
+    <label for="college" class="block font-medium">Your college <span class="subtle font-normal">(optional)</span></label>
+    <select id="college" name="college" aria-describedby="college-help" class="field mt-1 w-full px-3 py-2">
+      <option value="">Nearest to the rental</option>
+      {% for c in COLLEGES %}
+        <option value="{{ c.id }}"{% if college_id == c.id %} selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <p id="college-help" class="subtle mt-1 text-sm">
+      The report uses this college's off-campus fire safety advice. If your college isn't listed,
+      it uses statewide and national guidance.
+    </p>
+  </div>
+
+  <div>
     <div class="flex items-baseline justify-between gap-4">
       <label for="listing" class="block font-medium">Listing or lease text</label>
       <a href="/check?sample=1" class="link text-sm">Use a sample listing</a>

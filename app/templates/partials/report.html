@@ -100,6 +100,10 @@
     {% include "partials/census_card.html" %}
   {% endif %}
 
+  {% if college %}
+    {% include "partials/college_card.html" %}
+  {% endif %}
+
   <section aria-labelledby="report-problem-heading" class="cta-panel p-5">
     <h3 id="report-problem-heading" class="text-lg font-semibold">Seen a problem at this building?</h3>
     <p class="muted mt-1">

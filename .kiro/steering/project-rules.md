@@ -58,9 +58,16 @@ gives towns a list of buildings ranked by reported problems. Solo hackathon proj
 
 - Reports, questions, and checklists cite only these sources (`app/content/sources.py`), by name,
   never by section number: Massachusetts State Sanitary Code; Massachusetts carbon monoxide alarm
-  rules; Massachusetts smoke alarm rules; UMass Off-Campus Student Life; Amherst Fire Department
-  (Rental Property Overcrowding guidance); Massachusetts Department of Fire Services college fire
-  safety; NFPA construction site fire safety fact sheet.
+  rules; Massachusetts smoke alarm rules; Amherst Fire Department (Rental Property Overcrowding
+  guidance); Massachusetts Department of Fire Services college fire safety; NFPA construction site
+  fire safety fact sheet; NFPA college campus fire safety tips; and the verified off-campus fire
+  safety pages of nearby colleges (`app/content/colleges.py`: UMass Amherst, Boston University,
+  Tufts, MIT).
+- The app isn't only for UMass students. College guidance comes from the college nearest the
+  rental (or the one the student picks), and only for topics that college's page covers.
+  Otherwise use the NFPA campus tips or state sources. Never show one college's advice for a
+  rental near another. A college may be added only after its official off-campus fire safety
+  page has been fetched and read.
 - Approved data sources (shown as "Data from", never as rules): Analyze Boston datasets (SAM,
   Property Assessment, RentSmart, building violations, approved building permits), the Town of
   Amherst permit portal (link only, no bulk data), and Data Commons (U.S. Census American Community

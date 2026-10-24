@@ -25,6 +25,10 @@ SourceId = Literal[
     "amherst_fire",
     "dfs_college",
     "nfpa_construction",
+    "bu_off_campus",
+    "tufts_off_campus",
+    "mit_off_campus",
+    "nfpa_campus",
 ]
 
 
@@ -128,6 +132,57 @@ SOURCES: dict[str, Source] = {
                 "ignition sources, such as heaters and hot work like welding, cutting, and "
                 "roofing. A lapse in safety procedures can damage adjacent buildings. Sites "
                 "should be safeguarded around the clock, not just when work is being done."
+            ),
+        ),
+        # College off-campus fire safety pages (checked October 2026). The report uses the one
+        # for the college nearest the rental (app/content/colleges.py).
+        Source(
+            id="bu_off_campus",
+            name="Boston University fire safety tips for students on and off campus",
+            cite_as="Boston University",
+            url="https://www.bu.edu/articles/2017/fire-safety-tips/",
+            is_law=False,
+            summary=(
+                "Before moving in, check for working smoke and carbon monoxide detectors, with a "
+                "smoke detector outside each sleeping area and a CO detector on each level. Know "
+                "two escape routes and keep them clear, and check for locks that would block "
+                "getting out. Don't overload outlets, and never heat with a gas stove or oven."
+            ),
+        ),
+        Source(
+            id="tufts_off_campus",
+            name="Tufts University Off Campus Housing Fire Safety",
+            cite_as="the Tufts University Fire Safety Office",
+            url="https://publicsafety.tufts.edu/fire-safety/protocols-guides/campus-housing",
+            is_law=False,
+            summary=(
+                "Lists factors in off-campus student housing fires: no fire sprinklers, missing "
+                "or disabled smoke and carbon monoxide detection, smoking materials, unattended "
+                "cooking, more occupants, and alcohol. Advises weighing a building's fire "
+                "protection features when choosing a rental."
+            ),
+        ),
+        Source(
+            id="mit_off_campus",
+            name="MIT Off-Campus Housing: Off-Campus Safety and Security",
+            cite_as="MIT Off-Campus Housing",
+            url="https://mit.helpscoutdocs.com/article/2285-off-campus-safety-securit",
+            is_law=False,
+            summary=(
+                "Check that the unit has a working smoke detector. If the landlord won't install "
+                "or repair smoke or carbon monoxide detectors, report it to the fire department."
+            ),
+        ),
+        Source(
+            id="nfpa_campus",
+            name="NFPA college campus fire safety tips",
+            cite_as="the National Fire Protection Association",
+            url="https://content.nfpa.org/-/media/project/storefront/catalog/files/safety-tip-sheets/campussafetytips.pdf",
+            is_law=False,
+            summary=(
+                "Look for fully sprinklered housing when choosing a dorm or off-campus housing. "
+                "Off campus, have a fire escape plan with two ways out of every room. Test smoke "
+                "alarms monthly; interconnected alarms give the best protection."
             ),
         ),
     ]
