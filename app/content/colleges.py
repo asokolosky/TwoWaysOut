@@ -1,8 +1,9 @@
 """Colleges whose own off-campus fire safety guidance the report can use.
 
-Each college here has an official off-campus fire safety page that was fetched and read
-(October 2026); its citation is a Source in app/content/sources.py. Colleges without a page that
-could be verified are left out, and reports near them use statewide and national guidance.
+Each college in COLLEGES has an official off-campus fire safety page that was fetched and read
+(October 2026); its citation is a Source in app/content/sources.py. OTHER_BOSTON_AREA lists
+colleges students can pick but whose off-campus fire safety page couldn't be verified: their
+reports use statewide and national guidance, say so, and are never picked automatically.
 
 `topics` holds one plain sentence per checklist topic the page actually covers. Nothing here
 is a ranking input.
@@ -16,12 +17,18 @@ class College:
     id: str
     name: str
     short_name: str
-    source_id: str
-    lat: float
-    lon: float
-    towns: frozenset[str]  # uppercase town or neighborhood names
-    zips: frozenset[str]
+    # None for colleges without an off-campus fire safety page we could verify. They can be
+    # picked on the form, but their reports use statewide and national guidance only.
+    source_id: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+    towns: frozenset[str] = frozenset()  # uppercase town or neighborhood names
+    zips: frozenset[str] = frozenset()
     topics: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def has_guidance(self) -> bool:
+        return self.source_id is not None and bool(self.topics)
 
 
 COLLEGES: tuple[College, ...] = (
@@ -95,8 +102,54 @@ COLLEGES: tuple[College, ...] = (
     ),
 )
 
-COLLEGES_BY_ID = {c.id: c for c in COLLEGES}
-COLLEGE_SOURCE_IDS = frozenset(c.source_id for c in COLLEGES)
+GUIDED_COLLEGES = COLLEGES
+
+# Other Boston-area colleges students can pick. No off-campus fire safety page could be verified
+# for these (October 2026), so their reports use the NFPA campus tips and state sources, and say
+# so. Add a college to COLLEGES above only after reading its official off-campus page.
+OTHER_BOSTON_AREA: tuple[College, ...] = tuple(
+    College(id=i, name=n, short_name=s)
+    for i, n, s in (
+        ("babson", "Babson College", "Babson"),
+        ("bentley", "Bentley University", "Bentley"),
+        ("berklee", "Berklee College of Music", "Berklee"),
+        ("boston_conservatory", "Boston Conservatory at Berklee", "Boston Conservatory"),
+        ("bac", "Boston Architectural College", "BAC"),
+        ("bc", "Boston College", "BC"),
+        ("brandeis", "Brandeis University", "Brandeis"),
+        ("bhcc", "Bunker Hill Community College", "Bunker Hill"),
+        ("cambridge_college", "Cambridge College", "Cambridge College"),
+        ("curry", "Curry College", "Curry"),
+        ("emerson", "Emerson College", "Emerson"),
+        ("emmanuel", "Emmanuel College", "Emmanuel"),
+        ("fisher", "Fisher College", "Fisher"),
+        ("franklin_cummings", "Franklin Cummings Tech", "Franklin Cummings Tech"),
+        ("olin", "Franklin W. Olin College of Engineering", "Olin"),
+        ("harvard", "Harvard University", "Harvard"),
+        ("laboure", "Labouré College of Healthcare", "Labouré"),
+        ("lasell", "Lasell University", "Lasell"),
+        ("lesley", "Lesley University", "Lesley"),
+        ("massbay", "Massachusetts Bay Community College", "MassBay"),
+        ("massart", "Massachusetts College of Art and Design", "MassArt"),
+        ("mcphs", "MCPHS University", "MCPHS"),
+        ("mgh_ihp", "MGH Institute of Health Professions", "MGH Institute"),
+        ("nec", "New England Conservatory of Music", "NEC"),
+        ("northeastern", "Northeastern University", "Northeastern"),
+        ("quincy_college", "Quincy College", "Quincy College"),
+        ("regis", "Regis College", "Regis"),
+        ("rcc", "Roxbury Community College", "Roxbury CC"),
+        ("simmons", "Simmons University", "Simmons"),
+        ("suffolk", "Suffolk University", "Suffolk"),
+        ("umass_boston", "University of Massachusetts Boston", "UMass Boston"),
+        ("urban_college", "Urban College of Boston", "Urban College"),
+        ("wellesley", "Wellesley College", "Wellesley"),
+        ("wentworth", "Wentworth Institute of Technology", "Wentworth"),
+    )
+)
+
+ALL_COLLEGES: tuple[College, ...] = COLLEGES + OTHER_BOSTON_AREA
+COLLEGES_BY_ID = {c.id: c for c in ALL_COLLEGES}
+COLLEGE_SOURCE_IDS = frozenset(c.source_id for c in COLLEGES if c.source_id)
 
 # Used for a topic when the nearest college's page doesn't cover it, or no college is known.
 GENERAL_STUDENT_SOURCE = "nfpa_campus"

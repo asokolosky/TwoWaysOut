@@ -129,6 +129,35 @@ def test_chosen_college_on_form(client):
     assert "Off-campus fire safety from BU" in html and "You chose Boston University." in html
 
 
+def test_other_boston_college_without_guidance(client):
+    html = _post(client, "10 Main St, Worcester, MA 01609", college="northeastern")
+    body = re.sub(r"<select.*?</select>", "", html, flags=re.S)
+    assert "Off-campus fire safety for Northeastern students" in body
+    assert "couldn't verify an off-campus fire safety page" in body
+    # Falls back to national and state guidance, never another college's advice.
+    assert SOURCES["nfpa_campus"].url in body
+    assert not any(SOURCES[s].url in body for s in COLLEGE_SOURCE_IDS)
+
+
+def test_unverified_colleges_never_auto_picked():
+    from app.content.colleges import OTHER_BOSTON_AREA
+
+    for c in OTHER_BOSTON_AREA:
+        assert not c.has_guidance and c.lat is None and not c.zips
+    # A Fenway point near Northeastern still auto-picks a verified college (BU), not Northeastern.
+    assert nearest_college("360 Huntington Ave, Boston 02115", lat=42.3398, lon=-71.0892).id == "bu"
+
+
+def test_picker_lists_all_boston_area_colleges(client):
+    from app.content.colleges import ALL_COLLEGES
+
+    html = client.get("/check").text
+    assert 'label="Off-campus fire safety guidance checked"' in html
+    assert 'label="Other Boston-area colleges"' in html
+    for c in ALL_COLLEGES:
+        assert f'value="{c.id}"' in html
+
+
 def test_unknown_college_value_ignored(client):
     html = _post(client, "10 Main St, Worcester, MA 01609", college="<script>")
     assert "<script>" not in html.split("</select>", 1)[-1]

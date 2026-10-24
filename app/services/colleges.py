@@ -40,6 +40,7 @@ def nearest_college(
     """The student's chosen college, else the nearest one we have verified guidance for."""
     if chosen and chosen in COLLEGES_BY_ID:
         return COLLEGES_BY_ID[chosen]
+    # Automatic picks only use colleges whose guidance was verified and whose campus is placed.
     if lat is not None and lon is not None:
         best = min(COLLEGES, key=lambda c: _km(lat, lon, c.lat, c.lon))
         if _km(lat, lon, best.lat, best.lon) <= MAX_DISTANCE_KM:

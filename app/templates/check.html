@@ -35,13 +35,20 @@
     <label for="college" class="block font-medium">Your college <span class="subtle font-normal">(optional)</span></label>
     <select id="college" name="college" aria-describedby="college-help" class="field mt-1 w-full px-3 py-2">
       <option value="">Nearest to the rental</option>
-      {% for c in COLLEGES %}
-        <option value="{{ c.id }}"{% if college_id == c.id %} selected{% endif %}>{{ c.name }}</option>
-      {% endfor %}
+      <optgroup label="Off-campus fire safety guidance checked">
+        {% for c in COLLEGES %}
+          <option value="{{ c.id }}"{% if college_id == c.id %} selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </optgroup>
+      <optgroup label="Other Boston-area colleges">
+        {% for c in OTHER_COLLEGES %}
+          <option value="{{ c.id }}"{% if college_id == c.id %} selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </optgroup>
     </select>
     <p id="college-help" class="subtle mt-1 text-sm">
-      The report uses this college's off-campus fire safety advice. If your college isn't listed,
-      it uses statewide and national guidance.
+      The report uses this college's off-campus fire safety advice where we've checked it.
+      Otherwise it uses statewide and national guidance.
     </p>
   </div>
 

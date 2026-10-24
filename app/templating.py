@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
 
-from app.content.colleges import COLLEGES
+from app.content.colleges import COLLEGES, OTHER_BOSTON_AREA
 from app.content.copy import DISCLAIMER, RANKING_STATEMENT
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -14,4 +14,5 @@ templates.env.globals.update(
     DISCLAIMER=DISCLAIMER,
     RANKING_STATEMENT=RANKING_STATEMENT,
     COLLEGES=sorted(COLLEGES, key=lambda c: c.name),
+    OTHER_COLLEGES=sorted(OTHER_BOSTON_AREA, key=lambda c: c.name),
 )

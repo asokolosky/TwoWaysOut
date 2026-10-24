@@ -79,7 +79,7 @@ def _report_context(
     for q in building_qs + construction_qs:
         if q.source_id not in cited:
             cited.append(q.source_id)
-    if college is not None and college.source_id not in cited:
+    if college is not None and college.source_id and college.source_id not in cited:
         cited.append(college.source_id)
     return {
         "college": college,
