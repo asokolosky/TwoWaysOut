@@ -1,0 +1,68 @@
+{# Nearby construction. construction is a ConstructionContext; construction_questions are LandlordQuestions.
+   Block level only: never a house number, applicant, owner, contractor, comments, or valuation. #}
+<section aria-labelledby="construction-heading" class="panel p-5">
+  <h3 id="construction-heading" class="text-xl font-semibold">Construction nearby</h3>
+
+  {% if construction.kind == "boston" %}
+    {% if construction.sites %}
+      <p class="mt-1 muted">
+        Boston issued permits for new construction or major work within about
+        {{ construction.radius_m }} m of this address in the past two years.
+        {% if construction.any_next_door %}<strong>At least one site is next door.</strong>{% endif %}
+      </p>
+      <ul class="mt-3 space-y-2 text-sm">
+        {% for s in construction.sites %}
+          <li>
+            <span class="font-medium">{{ s.block_label }}</span>
+            · {{ s.work_label }}
+            · permit issued {{ s.issued_month }}
+            · {% if s.next_door %}next door{% else %}about {{ s.distance_m }} m away{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="mt-3 text-sm subtle">
+        Buildings under construction may not have working sprinklers or fire alarms yet, and
+        construction sites have heaters, welding, and other ignition sources. A permit means work
+        was approved, not that it has started or finished.
+        {% set nfpa = sources["nfpa_construction"] %}
+        Based on guidance from the
+        <a href="{{ nfpa.url }}" class="link" target="_blank" rel="noopener noreferrer">{{ nfpa.name }}<span class="sr-only"> (opens in a new tab)</span></a>.
+      </p>
+      {% if construction_questions %}
+        <h4 class="mt-4 font-semibold">Question about nearby construction</h4>
+        <ol class="mt-2 list-decimal space-y-3 pl-6">
+          {% for q in construction_questions %}
+            <li><p>{{ q.question }}</p><p class="text-sm subtle">{{ q.citation }}.</p></li>
+          {% endfor %}
+        </ol>
+      {% endif %}
+    {% else %}
+      <p class="mt-1 muted">
+        Boston's permit records show no new construction or major work within about
+        {{ construction.radius_m }} m of this address in the past two years. Smaller jobs and
+        work without a permit wouldn't show up here, so look around when you visit.
+      </p>
+    {% endif %}
+    <p class="mt-4 text-xs subtle">
+      Data from Analyze Boston: Approved Building Permits{% if construction.snapshot_date %}. Snapshot {{ construction.snapshot_date }}{% endif %}.
+      Sites are shown by block, not exact address.
+    </p>
+
+  {% elif construction.kind == "amherst" %}
+    <p class="mt-1 muted">
+      Amherst doesn't publish its building permits as a downloadable dataset, so TwoWaysOut can't
+      check for construction near this address. Ask the landlord whether there is construction
+      next door, and how that site is secured.
+    </p>
+    <p class="mt-2 text-sm">
+      You can also search permits on the
+      <a href="{{ construction.portal_url }}" class="link" target="_blank" rel="noopener noreferrer">Town of Amherst permit portal<span class="sr-only"> (opens in a new tab)</span></a>.
+    </p>
+
+  {% else %}
+    <p class="mt-1 muted">
+      TwoWaysOut only has construction permit data for Boston. Ask the landlord whether there is
+      construction next door, or ask the town's building department about permits nearby.
+    </p>
+  {% endif %}
+</section>

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{# Signed-in town pages never go into htmx's localStorage history cache. #}
+{% block body_attrs %} hx-history="false"{% endblock %}
+{% block title %}Town &amp; city dashboard · TwoWaysOut{% endblock %}
+{% block content %}
+{% include "partials/town_nav.html" %}
+<h1 class="mt-6 text-3xl font-bold tracking-tight">Town &amp; city dashboard</h1>
+<p class="ranking-statement mt-3 text-lg font-medium">{{ RANKING_STATEMENT }}.</p>
+<p class="muted mt-2 max-w-3xl">
+  Buildings with the most serious recent tenant reports and open fire-related city records are listed first.
+  Use this to plan inspections. A low score doesn't mean a building is safe.
+</p>
+
+<section aria-labelledby="real-heading" class="mt-10">
+  <h2 id="real-heading" class="text-2xl font-semibold">Real buildings</h2>
+  <form action="/town" method="get" class="panel mt-4 flex flex-wrap items-end gap-4 p-4"
+        hx-get="/town" hx-target="#town-results" hx-push-url="true">
+    <div>
+      <label for="filter-zip" class="block text-sm font-medium">ZIP code</label>
+      <input id="filter-zip" name="zip" type="text" inputmode="numeric" maxlength="5" pattern="[0-9]{5}"
+             autocomplete="off" value="{{ zip }}" aria-describedby="filter-zip-help"
+             class="mt-1 w-32 field px-3 py-2">
+      <p id="filter-zip-help" class="mt-1 text-xs subtle">5 digits, or leave blank</p>
+    </div>
+    <div>
+      <label for="filter-category" class="block text-sm font-medium">Problem</label>
+      <select id="filter-category" name="category" class="mt-1 field px-3 py-2">
+        <option value="">Any problem</option>
+        {% for cid, label in category_options %}
+          <option value="{{ cid }}" {% if cid == category %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <p class="mt-1 text-xs subtle">&nbsp;</p>
+    </div>
+    <div class="flex gap-3 pb-5">
+      <button type="submit" class="btn-primary">Apply filters</button>
+      <a href="/town" class="link self-center">Clear</a>
+    </div>
+  </form>
+  <div id="town-results" aria-live="polite">
+    {% include "partials/town_results.html" %}
+  </div>
+</section>
+
+<section aria-labelledby="sim-heading" class="mt-14">
+  <h2 id="sim-heading" class="text-2xl font-semibold">
+    Simulated tenant reports <span class="badge badge-sim align-middle">SIMULATED</span>
+  </h2>
+  <div role="note" class="note-disclaimer sim-banner mt-4 p-4">
+    <strong>These are simulated demo data, not real buildings.</strong>
+    They show how tenant reports would look. They have no addresses, aren't linked to any real
+    building, and are not part of the ranking above.
+  </div>
+  {% if simulated %}
+  <div class="table-scroll mt-4" role="region" aria-labelledby="sim-caption" tabindex="0">
+    <table class="data-table sim-table w-full text-left text-sm">
+      <caption id="sim-caption" class="text-left font-medium pb-2">Simulated buildings, ranked only against each other</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="py-2">Rank</th>
+          <th scope="col" class="py-2">Simulated building</th>
+          <th scope="col" class="py-2 num">Tenant score</th>
+          <th scope="col" class="py-2 num">Reports</th>
+          <th scope="col" class="py-2">Top hazards</th>
+          <th scope="col" class="py-2">Latest activity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in simulated %}
+          <tr class="sim-row">
+            <td class="py-2">{{ s.rank }}</td>
+            <th scope="row" class="py-2 font-normal">
+              <span class="badge badge-sim">SIMULATED</span>
+              <a href="/town/simulated/{{ s.sim_building | urlencode }}" class="link">{{ s.label }}</a>
+            </th>
+            <td class="py-2 num">{{ "%.1f" | format(s.tenant_score) }}</td>
+            <td class="py-2 num">{{ s.report_count }}</td>
+            <td class="py-2">{{ s.top_hazards | join(", ") if s.top_hazards else "None listed" }}</td>
+            <td class="py-2">{{ s.latest_activity[:7] if s.latest_activity else "Not listed" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="mt-4 muted">No simulated reports are loaded.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="how-heading" class="panel mt-14 p-6">
+  <h2 id="how-heading" class="text-xl font-semibold">How scores work</h2>
+  <ul class="mt-3 list-disc space-y-2 pl-6 muted">
+    <li>
+      <strong>Tenant score:</strong> each tenant report counts once, at its most serious problem.
+      Severity runs from 5 (no second way out, no working smoke alarm) down to 1 (other problems),
+      and a report's weight halves every {{ half_life }} days.
+    </li>
+    <li>
+      <strong>Official score:</strong> {{ open_points }} points per open fire-related violation plus
+      {{ recent_points }} point per fire-related city record in the last 12 months, capped at {{ official_cap }}.
+      Only shown for likely rental buildings.
+    </li>
+    <li><strong>Total:</strong> tenant score plus official score. Both parts are shown separately.</li>
+    <li>The ranking never uses building age, neighborhood, or demographics. Inspection status doesn't change scores.</li>
+  </ul>
+  <p class="mt-4 text-sm subtle">
+    Official records: {{ data_sources }}.
+    {% if snapshot_date %}Snapshot {{ snapshot_date }}.{% else %}Boston data isn't loaded on this server.{% endif %}
+    Tenant reports are anonymous and submitted through TwoWaysOut. Owner names are not shown.
+  </p>
+</section>
+{% endblock %}

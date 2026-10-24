@@ -1,0 +1,18 @@
+# Keep secrets, raw city data (owner names), local DBs, and dev files out of the build context.
+.venv
+.git
+.env
+.env.*
+!.env.example
+data/raw
+data/*.sqlite*
+.pytest_cache
+**/__pycache__
+**/*.py[cod]
+.kiro
+tests
+*.png
+.DS_Store
+.vscode
+# Render copies secret files into the build context root; keep them out of every COPY.
+datacommons_api_key

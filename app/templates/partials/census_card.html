@@ -1,0 +1,24 @@
+{# Area housing context by ZIP. census is a CensusContext. Context only; never used in ranking. #}
+<section aria-labelledby="census-heading" class="panel p-5">
+  <h3 id="census-heading" class="text-xl font-semibold">Area housing (U.S. Census via Data Commons)</h3>
+  <p class="mt-1 text-sm muted">This is about ZIP code {{ census.zip }}, not this building.</p>
+  <ul class="mt-3 list-disc space-y-1 pl-6">
+    {% if census.pct_built_before_1940 is not none %}
+      <li>About {{ census.pct_built_before_1940 }}% of homes were built in 1939 or earlier.</li>
+    {% endif %}
+    {% if census.pct_renter_occupied is not none %}
+      <li>About {{ census.pct_renter_occupied }}% of occupied homes are rented.</li>
+    {% endif %}
+  </ul>
+  <p class="mt-3 text-sm">
+    Smoke alarm requirements depend on when a building was built or last renovated, so ask the
+    landlord which rules apply.
+    {% set smoke = sources["smoke_alarm_rules"] %}
+    Based on
+    <a href="{{ smoke.url }}" class="link" target="_blank" rel="noopener noreferrer">{{ smoke.name }}<span class="sr-only"> (opens in a new tab)</span></a>.
+  </p>
+  <p class="mt-4 text-xs subtle">
+    American Community Survey 5-year estimates{% if census.year %} ending in {{ census.year }}{% endif %}.
+    Data from <a href="{{ census.url }}" class="link" target="_blank" rel="noopener noreferrer">Data Commons<span class="sr-only"> (opens in a new tab)</span></a>.
+  </p>
+</section>

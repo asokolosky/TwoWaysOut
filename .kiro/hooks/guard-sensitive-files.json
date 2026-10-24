@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Confirm before editing sensitive files",
+      "trigger": "PreToolUse",
+      "description": "Asks you to confirm before the agent writes, moves, or deletes .env, data/raw, the SQLite databases, the project rules, the fixed citation sources, the required copy strings, or deploy config.",
+      "matcher": "^(fs_write|str_replace|fs_append|delete_file|smart_relocate)$",
+      "action": {
+        "type": "command",
+        "command": ".venv/bin/python .kiro/hooks/scripts/guard_sensitive_paths.py",
+        "timeout": 10
+      }
+    }
+  ]
+}

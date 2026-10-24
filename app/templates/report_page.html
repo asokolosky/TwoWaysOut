@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{# Full-page report, used when JavaScript is off. HTMX requests get partials/report.html only. #}
+{% block title %}Fire-safety report · TwoWaysOut{% endblock %}
+
+{% block content %}
+{# The report's visible heading is an h2 (it sits under "Check a rental" on the HTMX page), so this page gets its own h1. #}
+<h1 class="sr-only">Fire-safety report</h1>
+<p><a href="/check" class="link">&larr; Check another rental</a></p>
+<div class="mt-6">
+  {% include "partials/report.html" %}
+</div>
+{% endblock %}

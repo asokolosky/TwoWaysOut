@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Privacy review after each spec task",
+      "trigger": "PostTaskExec",
+      "description": "After a spec task is marked complete, runs the tests and the read-only privacy review the project requires after every task.",
+      "action": {
+        "type": "agent",
+        "prompt": "A spec task was just completed. Before moving on: 1) Run `.venv/bin/pytest -q` and fix any failures. 2) Run a read-only privacy review of the files changed by this task (use the context-gatherer sub-agent with .kiro/agents/twowaysout-privacy-reviewer.md as its instructions). Audit against the Privacy rules in .kiro/steering/project-rules.md: no owner/contact fields, building history only for rentals, anonymous reports with emails/phones redacted, no client IPs stored or logged, uploads and listings never written to disk or logs, simulated reports isolated from real rankings, secrets only in .env. 3) If the task touched user-facing copy or citations, run `.venv/bin/python .kiro/skills/massachusetts-fire-safety-sources/scripts/check_citations.py`. Report findings by severity. Fix high and medium findings, and ask the user before changing rules, sources, or required strings."
+      }
+    }
+  ]
+}

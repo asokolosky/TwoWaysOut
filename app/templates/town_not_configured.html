@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{# Signed-in town pages never go into htmx's localStorage history cache. #}
+{% block body_attrs %} hx-history="false"{% endblock %}
+{% block title %}Dashboard isn't configured · TwoWaysOut{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold tracking-tight">Dashboard isn't configured</h1>
+<p class="muted mt-3 max-w-2xl">
+  The town &amp; city dashboard stays closed until it has a password and a session secret. It never opens without a password.
+</p>
+<section aria-labelledby="setup-heading" class="panel mt-8 max-w-2xl p-6">
+  <h2 id="setup-heading" class="text-xl font-semibold">Set it up</h2>
+  <ol class="mt-3 list-decimal space-y-2 pl-6">
+    <li>Copy <code>.env.example</code> to <code>.env</code> if you haven't already.</li>
+    <li>Set <code>DASHBOARD_PASSWORD</code> to a shared password for town or city staff.</li>
+    <li>
+      Set <code>SESSION_SECRET</code> to a random string of at least 32 characters. Generate one with
+      <code>python -c "import secrets; print(secrets.token_urlsafe(48))"</code>
+    </li>
+    <li>Restart the server.</li>
+  </ol>
+</section>
+<p class="mt-6"><a href="/" class="link">Back to home</a></p>
+{% endblock %}

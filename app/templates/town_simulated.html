@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{# Signed-in town pages never go into htmx's localStorage history cache. #}
+{% block body_attrs %} hx-history="false"{% endblock %}
+{% block title %}Simulated report · Town &amp; city dashboard · TwoWaysOut{% endblock %}
+{% block content %}
+{% include "partials/town_nav.html" %}
+<p class="mt-6 text-sm"><a href="/town#sim-heading" class="link">Back to the dashboard</a></p>
+<h1 class="mt-2 text-3xl font-bold tracking-tight">
+  <span class="badge badge-sim align-middle">SIMULATED</span> {{ sim.label }}
+</h1>
+<div role="note" class="note-disclaimer sim-banner mt-4 p-4">
+  <strong>This is simulated demo data, not a real building.</strong>
+  It has no address, isn't linked to any real building, and is not part of the real ranking.
+</div>
+<dl class="mt-6 grid gap-4 sm:grid-cols-2">
+  <div class="panel p-4"><dt class="text-sm subtle">Tenant score</dt><dd class="text-2xl font-semibold">{{ "%.1f" | format(sim.tenant_score) }}</dd></div>
+  <div class="panel p-4"><dt class="text-sm subtle">Simulated reports</dt><dd class="text-2xl font-semibold">{{ sim.report_count }}</dd></div>
+</dl>
+<section aria-labelledby="sim-reports-heading" class="mt-8">
+  <h2 id="sim-reports-heading" class="text-2xl font-semibold">Simulated reports</h2>
+  <ul class="mt-4 space-y-3">
+    {% for r in reports %}
+      <li class="panel sim-report p-4">
+        <p><span class="badge badge-sim">SIMULATED</span> <span class="font-medium">{{ r.category_label }}</span></p>
+        {% if r.month %}<p class="mt-1 text-sm subtle">{{ r.month }}</p>{% endif %}
+        {% if r.description %}<p class="mt-2 muted">{{ r.description }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

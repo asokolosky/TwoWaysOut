@@ -1,0 +1,77 @@
+# Implementation Plan
+
+- [x] 1. Construction classification in `scripts/construction.py`
+  - [x] 1.1 Classify new construction from "Erect/New Construction", "Foundation Permit", and worktype `ERECT`
+    - _Requirements: 1.1_
+  - [x] 1.2 Classify long-form structural work at $100,000 or more and all `RAZE` permits as major work
+    - _Requirements: 1.2, 1.3, 1.4_
+  - [x] 1.3 Limit permits to the 24 months up to the snapshot date
+    - _Requirements: 1.5_
+- [x] 2. Construction table privacy
+  - [x] 2.1 Read permits through the `CONSTRUCTION_COLUMNS` whitelist and never store the valuation
+    - _Requirements: 2.1, 2.2_
+  - [x] 2.2 Build block labels that never contain the house number
+    - _Requirements: 2.3, 2.5_
+  - [x] 2.3 Refuse fractions, second numbers, joiners, unit words, and unit letters (privacy review fix, tested)
+    - _Requirements: 2.4_
+  - [x] 2.4 Round coordinates to 4 decimals, keep Boston points only, and store one row per site
+    - _Requirements: 2.6, 2.7_
+- [x] 3. Nearby search in `app/services/construction.py`
+  - [x] 3.1 Bounding box query plus haversine within 250 m, nearest first, up to 8 sites
+    - _Requirements: 3.1_
+  - [x] 3.2 Exclude the matched parcel, its building parcel, and parcel-less points within 10 m
+    - _Requirements: 3.2_
+  - [x] 3.3 Dedupe by block and work label, round to 50 m, and mark next door under 60 m
+    - _Requirements: 3.3, 3.4_
+  - [x] 3.4 Show the card for any matched Boston address, rental or not
+    - _Requirements: 3.5_
+- [x] 4. Construction card
+  - [x] 4.1 Boston list with NFPA note, and the no-sites message
+    - _Requirements: 4.1, 4.2, 4.6_
+  - [x] 4.2 Amherst portal link and other-town building department line
+    - _Requirements: 4.3, 4.4_
+  - [x] 4.3 No card for blank, area-only, or unmatched addresses, or a missing table
+    - _Requirements: 4.5_
+- [x] 5. Construction question
+  - [x] 5.1 Add one NFPA-cited question in `construction_questions` and add the source to the report
+    - _Requirements: 5.1, 5.2, 5.3_
+- [x] 6. Data Commons build-time fetch in `scripts/fetch_datacommons.py`
+  - [x] 6.1 Fixed ZIP list of Boston ZIPs plus Amherst-area ZIPs
+    - _Requirements: 6.1_
+  - [x] 6.2 Request the four verified dcids and prefer the ACS 5-year facet
+    - _Requirements: 6.2_
+  - [x] 6.3 Accept either key name, send it only in `X-API-Key`, and never print it
+    - _Requirements: 6.3_
+  - [x] 6.4 Exit 0 without a key and exit 1 on request errors without leaking the key
+    - _Requirements: 6.4, 6.5_
+  - [x] 6.5 Run the fetch from `build_data.sh` only with a key, scoping a key file to that one step
+    - _Requirements: 6.5, 6.6_
+  - [x] 6.6 Write `datacommons.json` atomically and load it into `census_zip`
+    - _Requirements: 6.7_
+- [x] 7. Census card
+  - [x] 7.1 Pick the ZIP and compute whole percents in `app/services/census.py`
+    - _Requirements: 7.1, 7.5_
+  - [x] 7.2 Render the ZIP note, smoke alarm rules citation, ACS year, and Data Commons link
+    - _Requirements: 7.2, 7.3, 7.4_
+- [x] 8. Runtime and ranking boundaries
+  - [x] 8.1 No Data Commons calls in `app/` and no OpenContext MCP
+    - _Requirements: 8.1, 8.2_
+  - [x] 8.2 Keep construction and Census out of `app/services/ranking.py`
+    - _Requirements: 8.3_
+  - [x] 8.3 Labeled sections, "(opens in a new tab)" text, and copy rules checked in tests
+    - _Requirements: 8.4_
+- [x] 9. Rebuild and check real data (snapshot 2026-10-24)
+  - [x] 9.1 Confirm 1,551 construction sites and 0 block labels with digits in the street part
+    - _Requirements: 2.3, 2.4_
+  - [x] 9.2 Confirm 38 of 40 ZIPs from Data Commons, ACS ending 2024 (01002: 23% and 53%; 02120: 28% and 91%)
+    - _Requirements: 6.1, 7.1_
+- [ ] 10. Manual checks
+  - [ ] 10.1 Open the Amherst OpenGov permit portal link in a browser and confirm it loads the right portal
+    - _Requirements: 4.3_
+  - [ ] 10.2 Do a screen reader pass over the construction and census cards
+    - _Requirements: 8.4_
+- [ ] 11. Optional follow-ups
+  - [ ] 11.1 Set up the Data Commons MCP in Kiro for development exploration only, never in the app
+    - _Requirements: 8.1_
+  - [ ] 11.2 Add Amherst permit data if the town ever publishes it as a dataset
+    - _Requirements: 4.3_

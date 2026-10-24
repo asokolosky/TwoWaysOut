@@ -1,0 +1,57 @@
+{# Real buildings table. Swapped into #town-results by the filter form. #}
+{% if filter_error %}
+  <p role="alert" class="alert mt-4 p-3 text-sm">{{ filter_error }}</p>
+{% endif %}
+<p class="mt-4 text-sm muted" id="results-summary">
+  {% if total_count %}
+    Showing {{ buildings | length }} of {{ total_count }} building{{ "s" if total_count != 1 }}{% if zip %} in ZIP {{ zip }}{% endif %}{% if category %} matching the selected problem{% endif %}.
+  {% else %}
+    No buildings match these filters.
+  {% endif %}
+</p>
+{% if buildings %}
+<div class="table-scroll mt-3" role="region" aria-labelledby="real-caption" tabindex="0">
+  <table class="data-table town-table w-full text-left text-sm">
+    <caption id="real-caption" class="text-left font-medium pb-2">
+      Real buildings, ranked by total score (tenant score plus official score)
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" class="py-2">Rank</th>
+        <th scope="col" class="py-2">Address</th>
+        <th scope="col" class="py-2">Rental type</th>
+        <th scope="col" class="py-2 num">Tenant score</th>
+        <th scope="col" class="py-2 num">Official score</th>
+        <th scope="col" class="py-2 num">Total</th>
+        <th scope="col" class="py-2">Top hazards</th>
+        <th scope="col" class="py-2">Latest activity <span class="sr-only">(month)</span></th>
+        <th scope="col" class="py-2">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in buildings %}
+        {% set st = statuses.get(b.building_key, {"status": "open"}) %}
+        <tr data-building-key="{{ b.building_key }}">
+          <td class="py-2">{{ b.rank }}</td>
+          <th scope="row" class="py-2 font-normal">
+            <a href="{{ town_building_url(b.building_key) }}" class="link">{{ b.display_address }}</a>
+            {% if b.report_count %}<span class="block text-xs subtle">{{ b.report_count }} tenant report{{ "s" if b.report_count != 1 }}</span>{% endif %}
+          </th>
+          <td class="py-2">{{ (b.rental_type_label | title) if b.rental_type_label else "Not listed" }}</td>
+          <td class="py-2 num">{{ "%.1f" | format(b.tenant_score) }}</td>
+          <td class="py-2 num">{{ "%.1f" | format(b.official_score) }}</td>
+          <td class="py-2 num font-semibold">{{ "%.1f" | format(b.total_score) }}</td>
+          <td class="py-2">{{ b.top_hazards | join(", ") if b.top_hazards else "None listed" }}</td>
+          <td class="py-2">{{ b.latest_activity[:7] if b.latest_activity else "Not listed" }}</td>
+          <td class="py-2">{% with status = st.status %}{% include "partials/town_status_pill.html" %}{% endwith %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if has_more %}
+  <p class="mt-4">
+    <a href="{{ more_url }}" class="link" hx-get="{{ more_url }}" hx-target="#town-results" hx-push-url="true">Show more buildings</a>
+  </p>
+{% endif %}
+{% endif %}

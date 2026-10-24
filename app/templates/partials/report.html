@@ -1,0 +1,125 @@
+{% set status_label = {
+  "mentioned": "Mentioned · verify in person",
+  "concern": "Possible problem",
+  "not_mentioned": "Not mentioned",
+} %}
+{% set status_style = {
+  "mentioned": "pill-mentioned",
+  "concern": "pill-concern",
+  "not_mentioned": "pill-not-mentioned",
+} %}
+{% set severity_style = {
+  "high": "flag-high",
+  "medium": "flag-medium",
+  "low": "flag-low",
+} %}
+
+<article aria-labelledby="report-heading" class="space-y-10">
+  <header>
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 id="report-heading" class="text-2xl font-bold">Fire-safety report</h2>
+      {% if report.analyzer == "ai" %}
+        <span class="badge badge-ai">AI analysis</span>
+      {% else %}
+        <span class="badge badge-basic">Basic analysis</span>
+      {% endif %}
+    </div>
+    {% if report.fallback_reason %}
+      <p role="status" class="muted mt-2 text-sm">{{ report.fallback_reason }}</p>
+    {% endif %}
+    {% for note in notes or [] %}
+      <p class="muted mt-2 text-sm">{{ note }}</p>
+    {% endfor %}
+    {% if address %}
+      <p class="muted mt-1">For: {{ address }}{% if address_from_listing %} <span class="subtle text-sm">(found in the listing)</span>{% endif %}</p>
+    {% endif %}
+    <p class="muted mt-2">
+      This report only covers what the listing says. It can't tell you a unit is safe.
+      Check each item in person before you sign.
+      {% if report.analyzer == "ai" %}AI can make mistakes, so double-check anything important.{% endif %}
+    </p>
+  </header>
+
+  <section aria-labelledby="checklist-heading">
+    <h3 id="checklist-heading" class="text-xl font-semibold">Safety checklist</h3>
+    <ul class="mt-4 space-y-3">
+      {% for item in report.checklist %}
+        {% set info = topics[item.topic] %}
+        <li class="panel p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="font-medium">{{ info.label }}</span>
+            <span class="pill {{ status_style[item.status] }}">{{ status_label[item.status] }}</span>
+          </div>
+          {% if item.evidence %}
+            <p class="muted mt-2 text-sm">From the listing: <q class="italic">{{ item.evidence }}</q></p>
+          {% endif %}
+          <p class="subtle mt-2 text-sm">
+            {{ info.why }}
+            <a href="{{ sources[info.source_id].url }}" class="link" target="_blank" rel="noopener noreferrer">{{ sources[info.source_id].name }}<span class="sr-only"> (opens in a new tab)</span></a>
+          </p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if report.flags %}
+  <section aria-labelledby="flags-heading">
+    <h3 id="flags-heading" class="text-xl font-semibold">What to look into</h3>
+    <ul class="mt-4 space-y-3">
+      {% for flag in report.flags %}
+        <li class="flag {{ severity_style[flag.severity] }} py-2 pl-4 pr-3">
+          <span class="subtle text-xs font-semibold uppercase tracking-wide">{{ flag.severity }} priority</span>
+          <p>{{ flag.message }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section aria-labelledby="questions-heading">
+    <h3 id="questions-heading" class="text-xl font-semibold">Questions to ask the landlord</h3>
+    <ol class="mt-4 list-decimal space-y-3 pl-6">
+      {% for q in report.questions %}
+        <li>
+          <p>{{ q.question }}</p>
+          <p class="subtle text-sm">{{ q.citation }}.</p>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {% if ctx %}
+    {% include "partials/building_card.html" %}
+  {% endif %}
+
+  {% if construction %}
+    {% include "partials/construction_card.html" %}
+  {% endif %}
+
+  {% if census %}
+    {% include "partials/census_card.html" %}
+  {% endif %}
+
+  <section aria-labelledby="report-problem-heading" class="cta-panel p-5">
+    <h3 id="report-problem-heading" class="text-lg font-semibold">Seen a problem at this building?</h3>
+    <p class="muted mt-1">
+      If you live here or visited and saw a missing alarm, a blocked exit, or a bedroom without a
+      second way out, report it so inspectors can see it.
+    </p>
+    <a href="/report{% if address %}?address={{ address | urlencode }}{% endif %}"
+       class="btn-primary mt-3">
+      Report a problem here
+    </a>
+  </section>
+
+  <section aria-labelledby="sources-heading">
+    <h3 id="sources-heading" class="text-lg font-semibold">Sources</h3>
+    <ul class="mt-2 list-disc space-y-1 pl-6 text-sm">
+      {% for s in cited_sources %}
+        <li><a href="{{ s.url }}" class="link" target="_blank" rel="noopener noreferrer">{{ s.name }}<span class="sr-only"> (opens in a new tab)</span></a></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% include "partials/disclaimer.html" %}
+</article>

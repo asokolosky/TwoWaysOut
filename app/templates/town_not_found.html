@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{# Signed-in town pages never go into htmx's localStorage history cache. #}
+{% block body_attrs %} hx-history="false"{% endblock %}
+{% block title %}Not found · Town &amp; city dashboard · TwoWaysOut{% endblock %}
+{% block content %}
+{% include "partials/town_nav.html" %}
+<h1 class="mt-6 text-3xl font-bold tracking-tight">We couldn't find that {{ what }}</h1>
+<p class="mt-3 muted">It may have no reports or records anymore, or the link is incomplete.</p>
+<p class="mt-4"><a href="/town" class="link">Back to the dashboard</a></p>
+{% endblock %}

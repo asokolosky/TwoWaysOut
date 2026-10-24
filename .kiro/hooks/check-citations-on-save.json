@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Check citations and copy on save",
+      "trigger": "PostFileSave",
+      "description": "When copy, templates, or the analyzers are saved, flags section-number citations, em dashes, safe/compliant claims, and \"Required by\" on guidance sources.",
+      "matcher": "(^|/)app/(content/|templates/|services/(analyzer|rules_analyzer|building_questions)\\.py$)",
+      "action": {
+        "type": "command",
+        "command": ".venv/bin/python .kiro/skills/massachusetts-fire-safety-sources/scripts/check_citations.py",
+        "timeout": 30
+      }
+    }
+  ]
+}

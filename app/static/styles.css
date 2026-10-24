@@ -1,0 +1,533 @@
+/* TwoWaysOut design system on top of Tailwind.
+   These rules are unlayered, so they win over Tailwind's layered utilities and still
+   style the page if the Tailwind CDN fails to load. */
+
+:root {
+  color-scheme: dark;
+
+  /* Charcoal surfaces (darkest to lightest) */
+  --charcoal-950: #141210; /* page background */
+  --charcoal-900: #1b1815; /* header, footer */
+  --charcoal-800: #221e1a; /* cards, panels */
+  --charcoal-700: #2b2621; /* raised panels, inputs */
+  --charcoal-600: #3a332d; /* hairline dividers */
+
+  /* Warm text */
+  --text: #f5efe6;        /* body text */
+  --text-muted: #d2c7ba;  /* secondary text */
+  --text-subtle: #b3a698; /* hints, captions */
+
+  /* Borders */
+  --border-soft: #463e37; /* decorative card borders */
+  --border-field: #8c7f72; /* input borders, 3:1 against surfaces */
+
+  /* Ember accents */
+  --ember-1: #fb923c; /* bright orange */
+  --ember-2: #f97316;
+  --ember-3: #ef4444; /* bright red */
+  --ember-deep-1: #c2410c; /* button gradient, white text */
+  --ember-deep-2: #b91c1c;
+  --ember-link: #fdba74;  /* links and focus ring on charcoal */
+  --ember-link-hover: #fed7aa;
+  --ember-gradient: linear-gradient(90deg, var(--ember-1), var(--ember-3));
+  --ember-gradient-deep: linear-gradient(135deg, var(--ember-deep-1), var(--ember-deep-2));
+
+  /* Status colors */
+  --concern-bg: #3b1515;   --concern-text: #fecaca;   --concern-border: #ef4444;
+  --missing-bg: #36280c;   --missing-text: #fde68a;   --missing-border: #d97706;
+  --mentioned-bg: #0e2a38; --mentioned-text: #bae6fd; --mentioned-border: #0ea5e9;
+  --ai-bg: #2a2140;        --ai-text: #ddd6fe;        --ai-border: #8b5cf6;
+  --note-bg: #2d2410;      --note-text: #fde68a;      --note-border: #b45309;
+
+  /* Flag severity borders */
+  --sev-high: #ef4444;
+  --sev-medium: #f59e0b;
+  --sev-low: #8c7f72;
+}
+
+html { background: var(--charcoal-950); }
+
+body {
+  background: var(--charcoal-950);
+  color: var(--text);
+}
+
+/* ---------- Text helpers ---------- */
+.muted { color: var(--text-muted); }
+.subtle { color: var(--text-subtle); }
+
+.link {
+  color: var(--ember-link);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.link:hover { color: var(--ember-link-hover); text-decoration-thickness: 2px; }
+
+/* Text with the ember gradient (used only on large text). Falls back to solid color. */
+.ember-text {
+  color: var(--ember-1);
+  background: var(--ember-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@media (forced-colors: active) {
+  .ember-text { -webkit-text-fill-color: currentColor; background: none; }
+}
+
+/* ---------- Focus and skip link ---------- */
+:focus-visible {
+  outline: 3px solid var(--ember-link);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+main:focus-visible { outline: none; }
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  padding: 0.5rem 1rem;
+  background: var(--charcoal-800);
+  color: var(--text);
+  border: 2px solid var(--ember-link);
+  border-radius: 0.375rem;
+  z-index: 50;
+}
+.skip-link:focus { top: 0.5rem; }
+
+/* ---------- Header and footer ---------- */
+.site-header {
+  position: relative;
+  background: var(--charcoal-900);
+  border-bottom: 1px solid var(--charcoal-600);
+}
+/* Thin ember line under the header. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: var(--ember-gradient);
+  opacity: 0.8;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+}
+/* Sized by height to match the wordmark (text-xl line box, 1.75rem). The extra
+   class beats the later `.floorplan { width: 100% }` rule. */
+.brand .brand-icon.floorplan {
+  height: 2rem;
+  width: auto;
+  aspect-ratio: 220 / 160;
+  flex: none;
+}
+.nav-link { color: var(--text); text-underline-offset: 4px; }
+.nav-link:hover { color: var(--ember-link); text-decoration: underline; }
+
+.site-footer {
+  background: var(--charcoal-900);
+  border-top: 1px solid var(--charcoal-600);
+  color: var(--text-muted);
+}
+
+/* ---------- Surfaces ---------- */
+.panel {
+  background: var(--charcoal-800);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+}
+.panel-raised {
+  background: var(--charcoal-700);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+}
+
+.card {
+  position: relative;
+  display: block;
+  padding: 1.5rem;
+  background: var(--charcoal-800);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.card:hover {
+  border-color: var(--ember-2);
+  box-shadow: 0 0 0 1px rgb(249 115 22 / 0.35), 0 10px 30px -12px rgb(239 68 68 / 0.45);
+  transform: translateY(-2px);
+}
+.card-cta { color: var(--ember-link); font-weight: 600; }
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  display: inline-block;
+  border: 0;
+  border-radius: 0.375rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ember-gradient-deep);
+  box-shadow: 0 6px 20px -8px rgb(239 68 68 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.15);
+  cursor: pointer;
+  transition: filter 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.btn-primary:hover {
+  filter: brightness(0.92);
+  box-shadow: 0 8px 26px -8px rgb(239 68 68 / 0.75), inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+.btn-primary:active { transform: translateY(1px); }
+.btn-primary:disabled,
+.btn-primary[aria-disabled="true"] {
+  cursor: progress;
+  filter: saturate(0.6) brightness(0.85);
+  box-shadow: none;
+}
+
+/* ---------- Form fields ---------- */
+.field {
+  background: var(--charcoal-700);
+  color: var(--text);
+  border: 1px solid var(--border-field);
+  border-radius: 0.375rem;
+}
+.field::placeholder { color: var(--text-subtle); }
+.field:hover { border-color: var(--text-subtle); }
+.field:focus-visible,
+.field:focus {
+  outline: 3px solid var(--ember-link);
+  outline-offset: 1px;
+  border-color: var(--ember-link);
+}
+
+.field-file { color: var(--text-muted); }
+.field-file::file-selector-button {
+  margin-right: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-field);
+  border-radius: 0.375rem;
+  background: var(--charcoal-700);
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+}
+.field-file:hover::file-selector-button { border-color: var(--ember-link); }
+
+input[type="radio"], input[type="checkbox"] { accent-color: var(--ember-2); }
+
+.choice {
+  background: var(--charcoal-800);
+  border: 1px solid var(--border-soft);
+  border-radius: 0.375rem;
+}
+.choice:has(input:checked) {
+  border-color: var(--ember-2);
+  box-shadow: inset 3px 0 0 var(--ember-2);
+}
+
+/* ---------- Alerts and notes ---------- */
+.alert {
+  background: var(--concern-bg);
+  border: 1px solid var(--concern-border);
+  border-radius: 0.375rem;
+  color: var(--concern-text);
+}
+.note-danger {
+  background: var(--concern-bg);
+  border: 1px solid var(--concern-border);
+  border-left-width: 4px;
+  border-radius: 0.375rem;
+  color: var(--concern-text);
+}
+.note-disclaimer {
+  background: var(--note-bg);
+  border: 1px solid var(--note-border);
+  border-left-width: 4px;
+  border-radius: 0.375rem;
+  color: var(--note-text);
+}
+
+/* ---------- Badges and status pills ---------- */
+.badge, .pill {
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 9999px;
+  padding: 0.125rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+.badge-ai { background: var(--ai-bg); color: var(--ai-text); border-color: var(--ai-border); }
+.badge-basic { background: var(--charcoal-700); color: var(--text); border-color: var(--border-field); }
+.pill-concern { background: var(--concern-bg); color: var(--concern-text); border-color: var(--concern-border); }
+.pill-not-mentioned { background: var(--missing-bg); color: var(--missing-text); border-color: var(--missing-border); }
+.pill-mentioned { background: var(--mentioned-bg); color: var(--mentioned-text); border-color: var(--mentioned-border); }
+
+/* ---------- Flags ---------- */
+.flag {
+  background: var(--charcoal-800);
+  border-left: 4px solid var(--sev-low);
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+.flag-high { border-left-color: var(--sev-high); }
+.flag-medium { border-left-color: var(--sev-medium); }
+.flag-low { border-left-color: var(--sev-low); }
+
+/* ---------- Building card table ---------- */
+.data-table thead tr { border-bottom: 1px solid var(--border-field); color: var(--text-muted); }
+.data-table tbody tr { border-bottom: 1px solid var(--charcoal-600); }
+.data-table tbody tr:hover { background: var(--charcoal-700); }
+.data-table th, .data-table td { padding-right: 0.75rem; }
+
+details > summary { color: var(--ember-link); }
+details > summary:hover { color: var(--ember-link-hover); }
+
+/* ---------- Town dashboard ---------- */
+.town-bar {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--charcoal-600);
+}
+/* Quiet button for secondary actions: text 13:1, border 3:1+ on charcoal. */
+.btn-secondary {
+  display: inline-block;
+  border: 1px solid var(--border-field);
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--charcoal-700);
+  cursor: pointer;
+}
+.btn-secondary:hover { border-color: var(--ember-link); }
+.ranking-statement { color: var(--ember-link); }
+.table-scroll { overflow-x: auto; }
+.table-scroll:focus-visible { outline: 3px solid var(--ember-link); outline-offset: 2px; }
+.data-table caption { color: var(--text-muted); caption-side: top; }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.town-table th, .town-table td, .sim-table th, .sim-table td { vertical-align: top; }
+/* SIMULATED badge: amber note colors (#fde68a on #2d2410, about 12:1). */
+.badge-sim {
+  background: var(--note-bg);
+  color: var(--note-text);
+  border-color: var(--note-border);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+/* Inspection status pills. Always shown with a text label. */
+.status-open { background: var(--concern-bg); color: var(--concern-text); border-color: var(--concern-border); }
+.status-scheduled { background: var(--missing-bg); color: var(--missing-text); border-color: var(--missing-border); }
+.status-inspected { background: var(--mentioned-bg); color: var(--mentioned-text); border-color: var(--mentioned-border); }
+
+/* ---------- Report-a-problem call to action ---------- */
+.cta-panel {
+  position: relative;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgb(239 68 68 / 0.14), transparent 60%),
+    var(--charcoal-700);
+  border: 1px solid var(--ember-deep-1);
+  border-radius: 0.5rem;
+}
+
+/* ---------- Landing hero ---------- */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--charcoal-600);
+  background:
+    radial-gradient(90% 120% at 15% 110%, rgb(249 115 22 / 0.16), transparent 60%),
+    radial-gradient(60% 80% at 90% 100%, rgb(239 68 68 / 0.12), transparent 60%),
+    var(--charcoal-900);
+}
+.hero-content { position: relative; z-index: 1; }
+.embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---------- Floor plan icon ---------- */
+.floorplan { display: block; width: 100%; height: auto; }
+.floorplan .fp-wall { stroke: var(--text-subtle); }
+.floorplan .fp-inner { stroke: var(--border-field); }
+.floorplan .fp-window { stroke: var(--mentioned-text); }
+.floorplan .fp-door { stroke: var(--text-subtle); }
+.floorplan .fp-label { fill: var(--text-subtle); font: 600 9px/1 system-ui, sans-serif; letter-spacing: 0.08em; }
+.floorplan .fp-bed { fill: var(--charcoal-600); stroke: var(--border-field); }
+.floorplan .fp-path {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 3px rgb(249 115 22 / 0.8));
+}
+.floorplan .fp-exit { opacity: 1; }
+
+.floorplan.is-animated .fp-path-1 { animation: fp-draw-1 7s ease-in-out infinite; }
+.floorplan.is-animated .fp-path-2 { animation: fp-draw-2 7s ease-in-out infinite; }
+.floorplan.is-animated .fp-exit-1 { animation: fp-exit-1 7s ease-in-out infinite; }
+.floorplan.is-animated .fp-exit-2 { animation: fp-exit-2 7s ease-in-out infinite; }
+
+@keyframes fp-draw-1 {
+  0%   { stroke-dashoffset: 1; opacity: 1; }
+  25%  { stroke-dashoffset: 0; opacity: 1; }
+  85%  { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes fp-draw-2 {
+  0%, 35% { stroke-dashoffset: 1; opacity: 1; }
+  55%  { stroke-dashoffset: 0; opacity: 1; }
+  85%  { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes fp-exit-1 {
+  0%, 22% { opacity: 0; }
+  28%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes fp-exit-2 {
+  0%, 52% { opacity: 0; }
+  58%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---------- "Smoke clears" loading state on /check ---------- */
+.report-stage { position: relative; }
+.smoke {
+  position: absolute;
+  inset: -1rem;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: opacity 0.7s ease, visibility 0s linear 0.7s;
+}
+.smoke::before,
+.smoke::after {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  filter: blur(28px);
+}
+.smoke::before {
+  background:
+    radial-gradient(40% 35% at 25% 35%, rgb(210 199 186 / 0.20), transparent 70%),
+    radial-gradient(35% 30% at 70% 30%, rgb(179 166 152 / 0.18), transparent 70%),
+    radial-gradient(45% 40% at 50% 75%, rgb(140 127 114 / 0.22), transparent 70%);
+  animation: smoke-drift-a 9s ease-in-out infinite alternate;
+}
+.smoke::after {
+  background:
+    radial-gradient(30% 30% at 80% 70%, rgb(210 199 186 / 0.16), transparent 70%),
+    radial-gradient(35% 35% at 15% 80%, rgb(249 115 22 / 0.10), transparent 70%),
+    radial-gradient(30% 25% at 45% 20%, rgb(179 166 152 / 0.14), transparent 70%);
+  animation: smoke-drift-b 12s ease-in-out infinite alternate;
+}
+.report-stage.is-loading { min-height: 16rem; }
+.report-stage.is-loading .smoke {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s ease, visibility 0s;
+}
+.report-stage.is-loading #report {
+  filter: blur(6px);
+  opacity: 0.35;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+#report.smoke-reveal { animation: smoke-reveal 0.7s ease-out both; }
+
+@keyframes smoke-drift-a {
+  from { transform: translate3d(-4%, 3%, 0) scale(1); }
+  to   { transform: translate3d(4%, -4%, 0) scale(1.08); }
+}
+@keyframes smoke-drift-b {
+  from { transform: translate3d(3%, -2%, 0) scale(1.05); }
+  to   { transform: translate3d(-5%, 4%, 0) scale(1); }
+}
+@keyframes smoke-reveal {
+  from { filter: blur(12px); opacity: 0; }
+  to   { filter: blur(0); opacity: 1; }
+}
+@keyframes simple-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Keep the in-progress text readable while the smoke is up. */
+.analyzing { color: var(--text); font-weight: 500; }
+
+/* ---------- Utilities ---------- */
+
+/* Screen-reader-only text (Tailwind's sr-only, defined here so it works without the CDN). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Report form honeypot: off-screen, works even if the Tailwind CDN doesn't load. */
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* HTMX loading indicator. visibility: hidden keeps the idle text out of the accessibility tree
+   (opacity alone doesn't); it becomes visible inside a role="status" region, which announces it.
+   visibility switches after the fade out, and at once on the way in. */
+.htmx-indicator { opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0s linear 0.2s; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s, visibility 0s;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .card, .btn-primary, .htmx-indicator { transition: none; }
+  .card:hover { transform: none; }
+  .btn-primary:active { transform: none; }
+
+  /* Floor plan: both paths lit, no motion. */
+  .floorplan.is-animated .fp-path,
+  .floorplan.is-animated .fp-exit { animation: none; stroke-dashoffset: 0; opacity: 1; }
+
+  /* Embers: the canvas is not drawn; the hero keeps its static glow. */
+  .embers { display: none; }
+
+  /* Smoke: static haze while loading, no drift, blur, or fade; the report just appears. */
+  .smoke::before, .smoke::after { animation: none; }
+  .report-stage.is-loading .smoke { transition: none; }
+  .report-stage.is-loading #report { filter: none; transition: none; }
+  #report.smoke-reveal { animation: none; }
+
+  /* Catch-all: no animation or transition anywhere when reduced motion is on. */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

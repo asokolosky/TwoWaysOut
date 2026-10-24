@@ -1,0 +1,10 @@
+{# Signed-in bar for town pages. Needs csrf_token. #}
+<div class="town-bar flex flex-wrap items-center justify-between gap-3 text-sm">
+  <nav aria-label="Town and city dashboard">
+    <a href="/town" class="link">Dashboard</a>
+  </nav>
+  <form action="/town/logout" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn-secondary">Sign out</button>
+  </form>
+</div>

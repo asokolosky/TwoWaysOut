@@ -1,0 +1,26 @@
+{# Inspection status for one building. HTMX swaps only the children (innerHTML + hx-select), so the
+   aria-live region itself stays in the page and announces the change. #}
+<div id="building-status" aria-live="polite">
+  <p>
+    Current status:
+    {% with status = status.status %}{% include "partials/town_status_pill.html" %}{% endwith %}
+    {% if status.updated_on %}<span class="text-sm subtle">updated {{ status.updated_on }}</span>{% endif %}
+  </p>
+  {% if saved_message %}<p class="mt-2 text-sm muted">Status saved.</p>{% endif %}
+  <form action="/town/building/status" method="post" class="mt-4 flex flex-wrap items-end gap-3"
+        hx-post="/town/building/status" hx-target="#building-status" hx-swap="innerHTML"
+        hx-select="#building-status > *">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="key" value="{{ b.building_key }}">
+    <div>
+      <label for="status-select" class="block text-sm font-medium">Change status</label>
+      <select id="status-select" name="status" class="mt-1 field px-3 py-2">
+        {% for s in statuses %}
+          <option value="{{ s }}" {% if s == status.status %}selected{% endif %}>{{ TOWN_STATUS_LABELS[s] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary">Save status</button>
+  </form>
+  <p class="mt-2 text-xs subtle">Status is for planning only. It doesn't change the building's scores or rank.</p>
+</div>

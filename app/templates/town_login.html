@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{# Signed-in town pages never go into htmx's localStorage history cache. #}
+{% block body_attrs %} hx-history="false"{% endblock %}
+{% block title %}Town &amp; city dashboard sign in · TwoWaysOut{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold tracking-tight">Town &amp; city dashboard</h1>
+<p class="muted mt-3 max-w-2xl">
+  For town and city staff. The dashboard lists buildings by reported fire-safety problems so
+  inspectors can decide where to go first.
+</p>
+{% if error %}
+  <p role="alert" class="alert mt-6 max-w-md p-4">{{ error }}</p>
+{% endif %}
+<form action="/town/login" method="post" class="panel mt-8 max-w-md space-y-5 p-6">
+  <div>
+    <label for="password" class="block font-medium">Dashboard password</label>
+    <input id="password" name="password" type="password" required maxlength="1000"
+           autocomplete="current-password" aria-describedby="password-help"
+           class="mt-1 w-full field px-3 py-2">
+    <p id="password-help" class="mt-1 text-sm subtle">Ask your dashboard administrator for the shared password.</p>
+  </div>
+  <button type="submit" class="btn-primary">Sign in</button>
+</form>
+{% endblock %}

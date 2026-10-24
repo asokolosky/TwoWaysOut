@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run tests on save",
+      "trigger": "PostFileSave",
+      "description": "Runs the full pytest suite (about 7 seconds) when a file in app/, tests/, or scripts/ is saved. Stops at the first failure.",
+      "matcher": "(^|/)(app|tests|scripts)/.*\\.(py|html|js|css)$",
+      "action": {
+        "type": "command",
+        "command": ".venv/bin/pytest -q -x --no-header -p no:cacheprovider",
+        "timeout": 180
+      }
+    }
+  ]
+}

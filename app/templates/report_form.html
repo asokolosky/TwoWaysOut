@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Report a fire-safety problem · TwoWaysOut{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold tracking-tight">Report a fire-safety problem</h1>
+<p class="muted mt-3 max-w-3xl">
+  Tell your town about a problem in a rental: a missing smoke alarm, a blocked exit, or a bedroom
+  with no second way out. Reports help inspectors decide which buildings to visit first.
+</p>
+
+<div role="note" class="note-danger mt-6 max-w-3xl p-4">
+  <strong>If there's a fire or immediate danger, call 911.</strong> This form is not monitored in real time.
+</div>
+
+{% if error %}
+  <p role="alert" class="alert mt-6 max-w-3xl p-4">{{ error }}</p>
+{% endif %}
+
+<form action="/report" method="post" class="mt-8 max-w-3xl space-y-6" novalidate>
+  <div>
+    <label for="address" class="block font-medium">Building address</label>
+    <input id="address" name="address" type="text" required maxlength="{{ max_address }}"
+           autocomplete="street-address" value="{{ address }}"
+           aria-describedby="address-help"
+           class="mt-1 w-full field px-3 py-2">
+    <p id="address-help" class="mt-1 text-sm subtle">Include the street number and town or ZIP code. Unit number is optional.</p>
+  </div>
+
+  <fieldset aria-describedby="category-help">
+    <legend class="font-medium">What's the problem?</legend>
+    <p id="category-help" class="mt-1 text-sm subtle">Check all that apply.</p>
+    <div class="mt-2 space-y-2">
+      {% for c in categories.values() %}
+        <div class="choice flex items-start gap-3 p-3">
+          <input type="checkbox" id="cat-{{ c.id }}" name="category" value="{{ c.id }}"
+                 {% if c.id in category %}checked{% endif %}
+                 aria-describedby="cat-{{ c.id }}-hint" class="mt-1 h-4 w-4">
+          <div>
+            <label for="cat-{{ c.id }}" class="font-medium">{{ c.label }}</label>
+            <p id="cat-{{ c.id }}-hint" class="text-sm subtle">{{ c.hint }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <div>
+    <label for="description" class="block font-medium">Details <span class="font-normal subtle">(optional)</span></label>
+    <textarea id="description" name="description" rows="4" maxlength="{{ max_description }}"
+              aria-describedby="description-help"
+              class="mt-1 w-full field px-3 py-2">{{ description }}</textarea>
+    <p id="description-help" class="mt-1 text-sm subtle">
+      Where in the building, and how long it's been a problem. Don't include names, phone numbers,
+      or email addresses; any we find are removed.
+    </p>
+  </div>
+
+  <div>
+    <label for="observed_date" class="block font-medium">When did you notice it? <span class="font-normal subtle">(optional)</span></label>
+    <input id="observed_date" name="observed_date" type="date" value="{{ observed_date }}"
+           class="mt-1 field px-3 py-2">
+  </div>
+
+  {# Honeypot: hidden from people and screen readers; bots tend to fill it in. #}
+  <div class="hp" aria-hidden="true">
+    <label for="website">Leave this empty</label>
+    <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+  </div>
+
+  <p class="text-sm subtle">
+    Reports are anonymous. We don't ask for your name or contact information and don't store your IP address.
+  </p>
+
+  <button type="submit" class="btn-primary">
+    Send report
+  </button>
+</form>
+{% endblock %}

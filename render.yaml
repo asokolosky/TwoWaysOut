@@ -1,0 +1,40 @@
+# Render blueprint for TwoWaysOut (Docker web service).
+#
+# The persistent disk keeps data/app.sqlite (tenant reports, inspection statuses) across
+# deploys. Render's free plan has no persistent disk: on free, remove the `disk` block and
+# expect app.sqlite to reset on every deploy or restart. Disks need a paid plan (starter+).
+#
+# The Docker build downloads ~450 MB of Analyze Boston data and preprocesses it, so the first
+# build takes several minutes. Raw files stay in the builder stage and never reach the image.
+services:
+  - type: web
+    name: twowaysout
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    disk:
+      name: twowaysout-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      # Secrets: entered in the Render dashboard, never stored in this file or the image.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_DB_PATH
+        value: /data/app.sqlite
+      - key: FORCE_SECURE_COOKIES
+        value: "true"
+      # Proxy addresses (comma-separated IPs or CIDR ranges) allowed to set X-Forwarded-For.
+      # Render doesn't publish its proxy range, so the owner sets this in the dashboard after
+      # checking it (docs/DEPLOY.md). Unset, uvicorn trusts only 127.0.0.1.
+      - key: FORWARDED_ALLOW_IPS
+        sync: false
+      # Set to "1" to seed simulated demo reports on start when the table is empty.
+      - key: SEED_SIMULATED
+        value: "1"

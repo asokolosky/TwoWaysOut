@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Check a rental · TwoWaysOut{% endblock %}
+
+{% block head_scripts %}
+  <script src="{{ url_for('static', path='smoke.js').path }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold tracking-tight">Check a rental</h1>
+<p class="muted mt-3 max-w-3xl">
+  Paste the listing or upload the lease. TwoWaysOut checks it for the fire-safety basics:
+  smoke and carbon monoxide alarms, two ways out of every bedroom, sprinklers, heating,
+  and electrical. You'll get questions to ask the landlord before you sign.
+</p>
+
+<form action="/check" method="post" enctype="multipart/form-data"
+      hx-post="/check" hx-encoding="multipart/form-data"
+      hx-target="#report" hx-swap="innerHTML"
+      hx-indicator="#analyzing" hx-disabled-elt="find button[type=submit]"
+      class="mt-8 max-w-3xl space-y-5">
+  <div>
+    <label for="address" class="block font-medium">Rental address <span class="subtle font-normal">(optional)</span></label>
+    <input id="address" name="address" type="text" maxlength="200" autocomplete="street-address"
+           value="{{ address or '' }}"
+           aria-describedby="address-help"
+           class="field mt-1 w-full px-3 py-2">
+    <p id="address-help" class="subtle mt-1 text-sm">
+      For Boston addresses, the report includes the building's fire-related records.
+      Leave it blank to use the address in the listing.
+    </p>
+  </div>
+
+  <div>
+    <div class="flex items-baseline justify-between gap-4">
+      <label for="listing" class="block font-medium">Listing or lease text</label>
+      <a href="/check?sample=1" class="link text-sm">Use a sample listing</a>
+    </div>
+    <textarea id="listing" name="listing" rows="12" maxlength="{{ max_chars }}"
+              aria-describedby="listing-help"
+              class="field mt-1 w-full px-3 py-2 font-mono text-sm">{{ listing or '' }}</textarea>
+    <p id="listing-help" class="subtle mt-1 text-sm">Up to {{ "{:,}".format(max_chars) }} characters. Your text isn't saved.</p>
+  </div>
+
+  <div>
+    <label for="lease_pdf" class="block font-medium">Or upload a lease PDF <span class="subtle font-normal">(optional)</span></label>
+    <input id="lease_pdf" name="lease_pdf" type="file" accept="application/pdf,.pdf"
+           aria-describedby="pdf-help"
+           class="field-file mt-1 block w-full text-sm">
+    <p id="pdf-help" class="subtle mt-1 text-sm">
+      Up to 5 MB and 30 pages. Scanned leases can't be read, so paste their text instead.
+      The file isn't saved.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-4">
+    <button type="submit" class="btn-primary">
+      Get fire-safety report
+    </button>
+    {# The status region is always in the page; its text is hidden (visibility) until a request
+       starts, so screen readers announce it then and never read it while idle. #}
+    <p role="status" class="analyzing-status">
+      <span id="analyzing" class="htmx-indicator analyzing">Analyzing… this can take up to 30 seconds.</span>
+    </p>
+  </div>
+</form>
+
+<div class="report-stage mt-10" data-report-stage>
+  <div class="smoke" aria-hidden="true"></div>
+  <div id="report" aria-live="polite">
+    {% if error %}{% include "partials/check_error.html" %}{% endif %}
+  </div>
+</div>
+{% endblock %}

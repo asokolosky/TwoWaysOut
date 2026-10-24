@@ -1,0 +1,125 @@
+{# Boston records for the report. ctx is a BuildingContext; building_questions are LandlordQuestions. #}
+{% set kind_label = {"violation": "Violation", "complaint": "Complaint"} %}
+
+<section aria-labelledby="boston-heading" class="panel p-5">
+  {% if ctx.kind == "building" %}
+    {% set h = ctx.history %}
+    {% set b = h.building %}
+    <h3 id="boston-heading" class="text-xl font-semibold">Boston building records</h3>
+    <p class="mt-1 muted">
+      {{ h.match.display_address }}, {{ h.match.neighborhood }} {{ h.match.zip }}
+      <span class="text-sm subtle">
+        {% if h.match.match_type == "range" %}(matched the building at this address range){% endif %}
+        {% if h.match.match_type == "no_suffix" %}(matched without a street suffix; check this is the right building){% endif %}
+      </span>
+    </p>
+
+    <dl class="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+      <div><dt class="subtle">Building type</dt><dd class="font-medium">{{ b.land_use_desc | title }}{% if b.units %} · {{ b.units }} units{% endif %}</dd></div>
+      <div><dt class="subtle">Year built</dt><dd class="font-medium">{{ b.year_built or "Not listed" }}{% if b.year_remodeled %} · remodeled {{ b.year_remodeled }}{% endif %}</dd></div>
+      <div><dt class="subtle">Heat (city records)</dt><dd class="font-medium">{{ (b.heat_type.split(" - ", 1)[-1]) if b.heat_type else "Not listed" }}</dd></div>
+    </dl>
+
+    <h4 class="mt-5 font-semibold">Fire-related violations and complaints</h4>
+    {% if h.total_records %}
+      <p class="mt-1 text-sm muted">
+        {{ h.total_records }} record{{ "s" if h.total_records != 1 }} since {{ h.first_date[:4] }}{% if h.open_violations %}, <strong>{{ h.open_violations }} still open</strong>{% endif %}.
+        Violations were cited by city inspectors. Complaints were reported by residents and may not have been confirmed.
+      </p>
+      <table class="data-table mt-3 w-full text-left text-sm">
+        <caption class="sr-only">Fire-related records by category</caption>
+        <thead><tr>
+          <th scope="col" class="py-1 font-medium">Category</th>
+          <th scope="col" class="py-1 font-medium">Violations</th>
+          <th scope="col" class="py-1 font-medium">Complaints</th>
+          <th scope="col" class="py-1 font-medium">Open</th>
+        </tr></thead>
+        <tbody>
+          {% for c in h.counts if c.total %}
+            <tr>
+              <th scope="row" class="py-1 font-normal">{{ c.label }}</th>
+              <td class="py-1">{{ c.violations }}</td>
+              <td class="py-1">{{ c.complaints }}</td>
+              <td class="py-1">{{ c.open or "–" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <details class="mt-3 text-sm">
+        <summary class="cursor-pointer font-medium">Most recent records</summary>
+        <ul class="mt-2 space-y-2">
+          {% for r in h.recent %}
+            <li>
+              <span class="font-medium">{{ r.date or "Date not listed" }}</span> ·
+              {{ kind_label[r.kind] }}{% if r.status %} ({{ r.status | lower }}){% endif %} ·
+              {{ r.category_label }}<br>
+              <span class="muted">{{ r.description }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% else %}
+      <p class="mt-1 text-sm muted">
+        No fire-related violations or complaints on record. That doesn't mean the building is safe;
+        it only means nothing was reported or cited. Check each item in person.
+      </p>
+    {% endif %}
+
+    <h4 class="mt-5 font-semibold">Fire-safety permits</h4>
+    {% if h.permits %}
+      <ul class="mt-1 list-disc pl-6 text-sm">
+        {% for p in h.permits %}
+          <li>{{ p.label }}: {{ p.count }} permit{{ "s" if p.count != 1 }}, most recent {{ p.latest }}</li>
+        {% endfor %}
+      </ul>
+      <p class="mt-1 text-xs subtle">A permit means work was approved, not that it was finished or inspected.</p>
+    {% else %}
+      <p class="mt-1 text-sm muted">No fire alarm, sprinkler, or electrical permits on record.</p>
+    {% endif %}
+
+    {% if building_questions %}
+      <h4 class="mt-5 font-semibold">Questions based on these records</h4>
+      <ol class="mt-2 list-decimal space-y-3 pl-6">
+        {% for q in building_questions %}
+          <li><p>{{ q.question }}</p><p class="text-sm subtle">{{ q.citation }}.</p></li>
+        {% endfor %}
+      </ol>
+    {% endif %}
+
+    <p class="mt-5 text-xs subtle">
+      Source: {{ data_sources }}. Snapshot {{ h.snapshot_date }}. Owner names are not shown.
+    </p>
+
+  {% elif ctx.kind == "area" %}
+    {% set a = ctx.area.area %}
+    {% set city = ctx.area.city %}
+    <h3 id="boston-heading" class="text-xl font-semibold">Neighborhood context</h3>
+    <p class="mt-1 text-sm muted">{{ ctx.reason }}</p>
+    <p class="mt-3">
+      In <strong>{{ a.label }}</strong>, Boston recorded <strong>{{ a.total }}</strong> fire-related
+      violations and complaints in the past 12 months ({{ a.violations }} violations, {{ a.complaints }} complaints),
+      across {{ "{:,}".format(a.rental_buildings) }} likely rental buildings.
+    </p>
+    <ul class="mt-2 grid gap-x-6 text-sm sm:grid-cols-2">
+      {% for cat, n in a.by_category.items() if n %}
+        <li>{{ category_labels[cat] }}: {{ n }}</li>
+      {% endfor %}
+    </ul>
+    <p class="mt-3 text-sm subtle">
+      This is about the area, not this building.
+      Citywide over the same period: {{ "{:,}".format(city.total) }} records across {{ "{:,}".format(city.rental_buildings) }} likely rental buildings.
+    </p>
+    <p class="mt-4 text-xs subtle">Source: {{ data_sources }}. Snapshot {{ ctx.area.snapshot_date }}.</p>
+
+  {% else %}
+    <h3 id="boston-heading" class="text-xl font-semibold">Building records</h3>
+    <p class="mt-1 muted">{{ ctx.reason }}</p>
+    {% if ctx.candidates %}
+      <p class="mt-1 text-sm muted">Possible ZIP codes: {{ ctx.candidates | join(", ") }}.</p>
+    {% endif %}
+    <p class="mt-2 text-sm subtle">
+      Outside Boston, ask your town's Board of Health or building department for the property's
+      inspection history.
+    </p>
+  {% endif %}
+</section>

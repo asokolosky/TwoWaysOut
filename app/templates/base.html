@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+{% from "partials/floorplan.html" import floorplan %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#141210">
+  <title>{% block title %}TwoWaysOut{% endblock %}</title>
+  <meta name="description" content="Check an off-campus rental for fire safety before you sign the lease.">
+  <!-- Pinned versions with subresource integrity hashes -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3/dist/index.global.js"
+          integrity="sha384-2ql948lIdLcGEE0/qxNiudyTjgauA3RDJERu5xW75kFCvSl5a9odyQYCb6tEjnmB"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js"
+          integrity="sha384-2OatzQy1H+Zd/IIrjr1TcuDGqLXeHhbooAyJY1KdQMKnr4LZ22k31GBLdYKHmVjg"
+          crossorigin="anonymous"></script>
+  {# .path keeps static URLs same-origin relative: behind a TLS proxy that uvicorn doesn't trust,
+     an absolute http:// URL would be blocked as mixed content. #}
+  <link rel="stylesheet" href="{{ url_for('static', path='styles.css').path }}">
+  {% block head_scripts %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col"{% block body_attrs %}{% endblock %}>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="mx-auto max-w-5xl px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      <a href="/" class="brand text-xl font-bold tracking-tight">
+        {{ floorplan("fp-brand", animated=false, class="brand-icon") }}
+        <span>TwoWaysOut</span>
+      </a>
+      <nav aria-label="Main">
+        <ul class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+          <li><a href="/check" class="nav-link">Check a rental</a></li>
+          <li><a href="/report" class="nav-link">Report a problem</a></li>
+          <li><a href="/town" class="nav-link">For towns &amp; cities</a></li>
+          <li><a href="/about" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1" class="flex-1 mx-auto w-full max-w-5xl px-4 py-10">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="mx-auto max-w-5xl px-4 py-6 text-sm">
+      In an emergency, call 911. TwoWaysOut is a hackathon project and does not replace a professional inspection.
+    </div>
+  </footer>
+</body>
+</html>

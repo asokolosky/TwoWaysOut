@@ -1,0 +1,64 @@
+{# "Two ways out" floor plan icon.
+   id: unique prefix for gradient ids. animated: loop the exit paths (reduced motion shows both lit).
+   label: accessible name; when empty the icon is decorative (aria-hidden). #}
+{% macro floorplan(id, animated=true, label="", class="") -%}
+<svg class="floorplan {{ 'is-animated' if animated }} {{ class }}" viewBox="0 0 220 160"
+     {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true" focusable="false"{% endif %}
+     xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="{{ id }}-ember" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdba74"/>
+      <stop offset="0.5" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+
+  {# Outer walls with a window gap (left) and a front door gap (bottom). #}
+  <g fill="none" stroke-width="4" stroke-linecap="square" class="fp-wall">
+    <path d="M20 20 H200 V140 H170"/>
+    <path d="M146 140 H20 V68"/>
+    <path d="M20 42 V20"/>
+  </g>
+
+  {# Window in the bedroom wall #}
+  <g class="fp-window" stroke-width="1.5" fill="none">
+    <path d="M17 42 V68 M23 42 V68 M17 55 H23"/>
+  </g>
+
+  {# Interior walls with door openings #}
+  <g fill="none" stroke-width="2.5" class="fp-inner">
+    <path d="M90 20 V50"/>
+    <path d="M90 74 V140"/>
+    <path d="M20 88 H90"/>
+    <path d="M136 80 H200"/>
+  </g>
+
+  {# Door swings #}
+  <g fill="none" stroke-width="1.2" class="fp-door">
+    <path d="M90 50 L108 50" />
+    <path d="M108 50 A18 18 0 0 1 90 68" stroke-dasharray="2 2"/>
+    <path d="M146 140 V118" />
+    <path d="M146 118 A24 24 0 0 1 170 140" stroke-dasharray="2 2"/>
+  </g>
+
+  {# Bed and room label #}
+  <rect class="fp-bed" x="50" y="25" width="34" height="22" rx="3" stroke-width="1"/>
+  <rect class="fp-bed" x="53" y="28" width="9" height="16" rx="2" stroke-width="1"/>
+  <text class="fp-label" x="26" y="82">BEDROOM</text>
+
+  {# Exit path 1: bedroom door, hallway, front door #}
+  <path class="fp-path fp-path-1" pathLength="1" stroke="url(#{{ id }}-ember)"
+        d="M44 54 H96 Q118 58 120 80 V112 Q122 128 158 130 V156"/>
+  <path class="fp-exit fp-exit-1" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        d="M151 149 L158 156 L165 149"/>
+
+  {# Exit path 2: bedroom window #}
+  <path class="fp-path fp-path-2" pathLength="1" stroke="url(#{{ id }}-ember)"
+        d="M44 54 Q30 55 4 55"/>
+  <path class="fp-exit fp-exit-2" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        d="M11 48 L4 55 L11 62"/>
+
+  {# Start point in the bedroom #}
+  <circle cx="44" cy="54" r="4" fill="#fdba74"/>
+</svg>
+{%- endmacro %}

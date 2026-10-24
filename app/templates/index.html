@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "partials/floorplan.html" import floorplan %}
+
+{% block head_scripts %}
+  <script src="{{ url_for('static', path='embers.js').path }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<section aria-labelledby="hero-heading" class="hero px-6 py-10 sm:px-10 sm:py-14">
+  <canvas class="embers" aria-hidden="true" data-embers></canvas>
+  <div class="hero-content grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_9rem]">
+    <div class="max-w-3xl">
+      <h1 id="hero-heading" class="text-4xl font-bold tracking-tight sm:text-5xl">
+        Check a rental's fire safety <span class="ember-text">before you sign.</span>
+      </h1>
+      <p class="muted mt-4 text-lg">
+        Off-campus housing is where students face the highest fire risk.
+        TwoWaysOut reads a listing or lease, flags missing safety information,
+        and gives you specific questions to ask the landlord.
+      </p>
+    </div>
+    <div class="mx-auto w-28 max-w-full md:w-36">
+      {{ floorplan("fp-hero", animated=true, label="Floor plan showing two ways out of a bedroom") }}
+    </div>
+  </div>
+</section>
+
+<section aria-label="Get started" class="mt-10 grid gap-6 sm:grid-cols-2">
+  <a href="/check" class="card">
+    <h2 class="text-xl font-semibold">Check a rental</h2>
+    <p class="muted mt-2">
+      For students. Paste a listing or upload a lease and get a fire-safety report:
+      smoke alarms, two ways out of every bedroom, sprinklers, heating, and electrical.
+    </p>
+    <span class="card-cta mt-4 inline-block" aria-hidden="true">Start a check &rarr;</span>
+  </a>
+
+  <a href="/town" class="card">
+    <h2 class="text-xl font-semibold">For towns &amp; cities</h2>
+    <p class="muted mt-2">
+      For town and city inspectors and boards of health. See buildings ranked by reported
+      hazards and official records, so inspections go where problems are reported.
+    </p>
+    <span class="card-cta mt-4 inline-block" aria-hidden="true">Open the dashboard &rarr;</span>
+  </a>
+</section>
+{% endblock %}
